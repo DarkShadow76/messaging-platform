@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  api:
+    container_name: message-api
+    build: ./message-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./message-api/.env
+  app:
+    container_name: message-app
+    build: ./message-app
+    ports:
+      - "5173:80" # The frontend is served by Nginx on port 80 inside the container. We map it to 5173 on the host.
+      - "8443:443"
