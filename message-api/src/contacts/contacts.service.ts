@@ -18,4 +18,18 @@ export class ContactsService {
 
     return data;
   }
+
+  async search(query: string): Promise<Contact[]> {
+    const { data, error } = await this.SupabaseService
+      .getClient()
+      .from('contacts')
+      .select('*')
+      .ilike('name', `%${query}%`);
+
+    if (error) {
+      throw new Error(`Error searching contacts: ${error.message}`);
+    }
+
+    return data;
+  }
 }

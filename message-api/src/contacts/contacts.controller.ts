@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { Contact } from './entities/contact.entity';
 import { AuthGuard } from 'src/auth/auth/auth.guard';
@@ -11,5 +11,10 @@ export class ContactsController {
   @Get()
   async findAll(): Promise<Contact[]> {
     return this.contactsService.findAll();
+  }
+
+  @Get('search')
+  async search(@Query('q') query: string): Promise<Contact[]> {
+    return this.contactsService.search(query);
   }
 }

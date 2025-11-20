@@ -3,7 +3,8 @@ import { useAuthStore } from '../store/authStore';
 import { useMessageStore } from '../store/messageStore';
 import { useNavigate } from 'react-router-dom';
 import { ContactList } from '../components/ContactList';
-import type { Contact } from '../types';
+import { supabase } from '../supabaseClient';
+import type { Contact, Message } from '../types';
 import './ChatPage.css';
 
 // A simple utility function to format the timestamp
@@ -15,7 +16,7 @@ const formatTime = (dateString: string) => {
 export const ChatPage = () => {
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.session?.user);
-  const { messages, fetchMessages, sendMessage } = useMessageStore();
+  const { messages, fetchMessages, sendMessage, addMessage } = useMessageStore();
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -33,6 +34,30 @@ export const ChatPage = () => {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const newMessage = payload.new as Message;
+          if (
+            selectedContact &&
+            ((newMessage.sender_id === user?.id && newMessage.receiver_id === selectedContact.user_id) ||
+             (newMessage.sender_id === selectedContact.user_id && newMessage.receiver_id === user?.id))
+          ) {
+            addMessage(newMessage);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedContact, user, addMessage]);
 
   const handleLogout = async () => {
     try {
