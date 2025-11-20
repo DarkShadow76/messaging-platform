@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useMessageStore } from '../store/messageStore';
-import { useNavigate } from 'react-router-dom';
 import { ContactList } from '../components/ContactList';
 import { ChatHeader } from '../components/ChatHeader';
 import { MessageList } from '../components/MessageList';
 import { MessageInput } from '../components/MessageInput';
 import { supabase } from '../supabaseClient';
 import type { Contact, Message } from '../types';
+import { AddContactModal } from '../components/AddContactModal';
 import './ChatPage.css';
 
 export const ChatPage = () => {
@@ -16,7 +17,8 @@ export const ChatPage = () => {
   const { messages, fetchMessages, sendMessage, addMessage } = useMessageStore();
   const navigate = useNavigate();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [isContactListOpen, setIsContactListOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
 
   useEffect(() => {
     if (user && selectedContact) {
@@ -79,43 +81,54 @@ export const ChatPage = () => {
     }
   };
 
-  const toggleContactList = () => {
-    setIsContactListOpen(!isContactListOpen);
-  };
-
   return (
     <div className="chat-container">
-      <div className="chat-page">
-        <div
-          className={`overlay ${isContactListOpen ? 'open' : ''}`}
-          onClick={toggleContactList}
-        ></div>
-        <ContactList
-          onSelectContact={setSelectedContact}
-          selectedContact={selectedContact}
-          isOpen={isContactListOpen}
-        />
+      <div className="chat-page glass-panel">
+        <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+          <ContactList
+            onSelectContact={(contact) => {
+              setSelectedContact(contact);
+              setIsSidebarOpen(false);
+            }}
+            selectedContact={selectedContact}
+            isOpen={true}
+          />
+        </div>
+        
         <main className="chat-main">
           <ChatHeader
             selectedContact={selectedContact}
-            onToggleSidebar={toggleContactList}
             onLogout={handleLogout}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            onAddContact={() => setIsAddContactModalOpen(true)}
           />
+          
           {selectedContact ? (
             <>
-              <MessageList messages={messages} currentUserId={user?.id} />
+              <MessageList
+                messages={messages}
+                currentUserId={user?.id || ''}
+              />
               <MessageInput onSendMessage={handleSendMessage} />
             </>
           ) : (
             <div className="no-contact-selected">
               <div>
-                <h2>Messaging App</h2>
-                <p>Select a contact to start chatting</p>
+                <h2>Welcome, {user?.email}</h2>
+                <p>Select a contact to start messaging</p>
               </div>
             </div>
           )}
         </main>
       </div>
+      <AddContactModal
+        isOpen={isAddContactModalOpen}
+        onClose={() => setIsAddContactModalOpen(false)}
+        onSelectContact={(contact) => {
+          setSelectedContact(contact);
+          setIsAddContactModalOpen(false);
+        }}
+      />
     </div>
   );
 };
