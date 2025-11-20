@@ -17,4 +17,9 @@ export class ContactsController {
   async search(@Query('q') query: string): Promise<Contact[]> {
     return this.contactsService.search(query);
   }
+
+  @Get('search-by-email')
+  async searchByEmail(@Query('email') email: string): Promise<Contact[]> {
+    return this.contactsService.findByEmail(email);
+  }
 }

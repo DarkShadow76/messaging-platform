@@ -23,24 +23,28 @@ export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContact
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    if (query.trim().length < 2) {
+    if (query.trim().length < 3) {
       setSearchResults([]);
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/contacts/search?q=${query}`, {
+      const response = await fetch(`http://localhost:3000/contacts/search-by-email?email=${query}`, {
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
       });
       if (response.ok) {
         const data = await response.json();
-        setSearchResults(data);
+        // The endpoint now returns an array of contacts
+        setSearchResults(Array.isArray(data) ? data : []);
+      } else {
+         setSearchResults([]);
       }
     } catch (error) {
       console.error('Error searching contacts:', error);
+      setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -57,8 +61,8 @@ export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContact
         </div>
         <div className="modal-body">
           <input
-            type="text"
-            placeholder="Search by name..."
+            type="email"
+            placeholder="Enter email address..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             autoFocus
@@ -83,10 +87,10 @@ export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContact
                   <span>{contact.name}</span>
                 </div>
               ))
-            ) : searchQuery.length >= 2 ? (
-              <p>No users found.</p>
+            ) : searchQuery.length >= 3 ? (
+              <p>No user found with this email.</p>
             ) : (
-              <p>Type at least 2 characters to search.</p>
+              <p>Type at least 3 characters to search.</p>
             )}
           </div>
         </div>

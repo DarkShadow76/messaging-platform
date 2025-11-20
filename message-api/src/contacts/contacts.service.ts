@@ -32,4 +32,36 @@ export class ContactsService {
 
     return data;
   }
+
+  async findByEmail(email: string): Promise<Contact[]> {
+    const adminClient = this.SupabaseService.getAdminClient();
+    
+    // 1. Find users by email using admin auth client (partial match)
+    const { data: { users }, error: userError } = await adminClient.auth.admin.listUsers();
+    
+    if (userError) {
+      throw new Error(`Error listing users: ${userError.message}`);
+    }
+
+    const matchedUsers = users.filter((u: any) => u.email?.toLowerCase().includes(email.toLowerCase()));
+
+    if (matchedUsers.length === 0) {
+      return [];
+    }
+
+    const userIds = matchedUsers.map(u => u.id);
+
+    // 2. Get contact details for these users
+    const { data: contacts, error: contactError } = await this.SupabaseService
+      .getClient()
+      .from('contacts')
+      .select('*')
+      .in('user_id', userIds);
+
+    if (contactError) {
+      return []; 
+    }
+
+    return contacts;
+  }
 }
