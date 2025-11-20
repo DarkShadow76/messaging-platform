@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  api:
+    container_name: message-api-dev
+    build:
+      context: ./message-api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./message-api/src:/usr/src/app/src
+    env_file:
+      - ./message-api/.env
+    command: npm run start:dev
+  app:
+    container_name: message-app-dev
+    build:
+      context: ./message-app
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./message-app/src:/usr/src/app/src
+    env_file:
+      - ./message-app/.env
