@@ -3,6 +3,7 @@ export interface Message {
   sender_id: string;
   receiver_id: string;
   content: string;
+  image_url?: string;
   created_at: string; // Date will be a string when serialized
 }
 

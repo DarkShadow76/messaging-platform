@@ -9,7 +9,7 @@ export class MessagesService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
   async create(createMessageDto: CreateMessageDto, senderId: string): Promise<Message> {
-    const { receiver_id, content } = createMessageDto;
+    const { receiver_id, content, image_url } = createMessageDto;
     const { data, error } = await this.supabaseService
       .getClient()
       .from('messages')
@@ -17,6 +17,7 @@ export class MessagesService {
         sender_id: senderId,
         receiver_id,
         content,
+        image_url,
       })
       .select()
       .single();

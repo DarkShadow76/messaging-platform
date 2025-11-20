@@ -27,7 +27,16 @@ export const MessageList = ({ messages, currentUserId }: MessageListProps) => {
           key={msg.id}
           className={`message ${msg.sender_id === currentUserId ? 'self' : 'other'}`}
         >
-          <p className="message-content glass-panel">{msg.content}</p>
+          <div className="message-content glass-panel">
+            {msg.image_url && (
+              <img
+                src={msg.image_url}
+                alt="Shared image"
+                style={{ maxWidth: '200px', borderRadius: '8px', marginBottom: '8px', display: 'block' }}
+              />
+            )}
+            <p style={{ margin: 0 }}>{msg.content}</p>
+          </div>
           <span className="message-timestamp">{formatTime(msg.created_at)}</span>
         </div>
       ))}

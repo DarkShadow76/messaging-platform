@@ -7,7 +7,7 @@ const API_URL = 'http://localhost:3000';
 interface MessageState {
   messages: Message[];
   fetchMessages: (contactId: string) => Promise<void>;
-  sendMessage: (receiverId: string, content: string) => Promise<void>;
+  sendMessage: (receiverId: string, content: string, imageUrl?: string) => Promise<void>;
   addMessage: (message: Message) => void;
 }
 
@@ -30,7 +30,7 @@ export const useMessageStore = create<MessageState>((set) => ({
     const messages = await response.json();
     set({ messages });
   },
-  sendMessage: async (receiverId, content) => {
+  sendMessage: async (receiverId, content, imageUrl) => {
     const session = useAuthStore.getState().session;
     if (!session) return;
 
@@ -40,7 +40,7 @@ export const useMessageStore = create<MessageState>((set) => ({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ receiver_id: receiverId, content }),
+      body: JSON.stringify({ receiver_id: receiverId, content, image_url: imageUrl }),
     });
 
     if (!response.ok) {

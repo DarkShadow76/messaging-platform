@@ -25,6 +25,12 @@ export const ChatPage = () => {
   }, [user, selectedContact, fetchMessages]);
 
   useEffect(() => {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
     const channel = supabase
       .channel('messages')
       .on(
@@ -38,6 +44,13 @@ export const ChatPage = () => {
              (newMessage.sender_id === selectedContact.user_id && newMessage.receiver_id === user?.id))
           ) {
             addMessage(newMessage);
+          }
+
+          // Notification logic
+          if (newMessage.receiver_id === user?.id && document.hidden) {
+            new Notification('New Message', {
+              body: newMessage.content || 'Sent an image',
+            });
           }
         }
       )
@@ -57,10 +70,10 @@ export const ChatPage = () => {
     }
   };
 
-  const handleSendMessage = async (message: string) => {
+  const handleSendMessage = async (message: string, imageUrl?: string) => {
     if (!selectedContact) return;
     try {
-      await sendMessage(selectedContact.user_id, message);
+      await sendMessage(selectedContact.user_id, message, imageUrl);
     } catch (error) {
       alert('Send message failed: ' + (error as Error).message);
     }
