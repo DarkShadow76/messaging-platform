@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo
 
-El objetivo de este reto es diseñar e implementar una plataforma de mensajería en tiempo real similar a WhatsApp o Messenger, utilizando **React** para el frontend y **Supabase** como base de datos.
+El objetivo de este reto es diseñar e implementar una plataforma de mensajería en tiempo real similar a WhatsApp o WhatsApp, utilizando **React** para el frontend y **Supabase** como base de datos.
 
 Se evaluará la **infraestructura, escalabilidad, buenas prácticas y optimización del rendimiento** del proyecto.
 
