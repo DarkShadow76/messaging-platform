@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
-import type { Contact } from '../types';
+import type { Contact, UserSearchResult } from '../types';
 
 interface AddContactModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectContact: (contact: Contact) => void;
+  onAddContact: (user: UserSearchResult) => Promise<void>; // Changed prop name and type
 }
 
-export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContactModalProps) => {
+export const AddContactModal = ({ isOpen, onClose, onAddContact }: AddContactModalProps) => { // Changed prop name
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Contact[]>([]);
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]); // Changed type
   const [isLoading, setIsLoading] = useState(false);
   const session = useAuthStore((state) => state.session);
 
@@ -19,6 +19,7 @@ export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContact
       setSearchQuery('');
       setSearchResults([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleSearch = async (query: string) => {
@@ -36,14 +37,13 @@ export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContact
         },
       });
       if (response.ok) {
-        const data = await response.json();
-        // The endpoint now returns an array of contacts
+        const data: UserSearchResult[] = await response.json(); // Cast data type
         setSearchResults(Array.isArray(data) ? data : []);
       } else {
          setSearchResults([]);
       }
     } catch (error) {
-      console.error('Error searching contacts:', error);
+      console.error('Error searching users:', error); // Changed log message
       setSearchResults([]);
     } finally {
       setIsLoading(false);
@@ -72,19 +72,19 @@ export const AddContactModal = ({ isOpen, onClose, onSelectContact }: AddContact
             {isLoading ? (
               <p>Searching...</p>
             ) : searchResults.length > 0 ? (
-              searchResults.map((contact) => (
+              searchResults.map((user) => ( // Changed variable name to user
                 <div
-                  key={contact.id}
+                  key={user.id}
                   className="search-result-item"
-                  onClick={() => {
-                    onSelectContact(contact);
+                  onClick={async () => { // Made onClick async
+                    await onAddContact(user); // Call onAddContact
                     onClose();
                   }}
                 >
                   <div className="contact-avatar small">
-                    <img src={contact.avatar_url} alt={contact.name} />
+                    <img src={user.avatar_url || 'https://www.gravatar.com/avatar/?d=mp'} alt={user.full_name || user.email} /> // Use user.avatar_url, fallback to gravatar, use full_name or email
                   </div>
-                  <span>{contact.name}</span>
+                  <span>{user.full_name || user.email}</span> // Use user.full_name or email
                 </div>
               ))
             ) : searchQuery.length >= 3 ? (

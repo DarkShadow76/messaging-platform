@@ -13,3 +13,11 @@ export interface Contact {
   name: string;
   avatar_url: string;
 }
+
+export interface UserSearchResult {
+  id: string; // UUID from public.users
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  avatar_url?: string;
+}

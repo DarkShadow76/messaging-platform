@@ -2,29 +2,31 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useMessageStore } from '../store/messageStore';
+import { useContactStore } from '../store/contactStore'; // Added import
 import { ContactList } from '../components/ContactList';
 import { ChatHeader } from '../components/ChatHeader';
 import { MessageList } from '../components/MessageList';
 import { MessageInput } from '../components/MessageInput';
 import { supabase } from '../supabaseClient';
-import type { Contact, Message } from '../types';
+import type { Contact, Message, UserSearchResult } from '../types'; // Added UserSearchResult
 import { AddContactModal } from '../components/AddContactModal';
 import './ChatPage.css';
 
 export const ChatPage = () => {
   const logout = useAuthStore((state) => state.logout);
-  const user = useAuthStore((state) => state.session?.user);
+  const userSession = useAuthStore((state) => state.session); // Renamed user to userSession for clarity
   const { messages, fetchMessages, sendMessage, addMessage } = useMessageStore();
+  const { addContact: addContactToStore } = useContactStore(); // Get addContact from contactStore
   const navigate = useNavigate();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
 
   useEffect(() => {
-    if (user && selectedContact) {
+    if (userSession?.user && selectedContact) { // Use userSession?.user
       fetchMessages(selectedContact.user_id);
     }
-  }, [user, selectedContact, fetchMessages]);
+  }, [userSession?.user, selectedContact, fetchMessages]); // Use userSession?.user
 
   useEffect(() => {
     if (Notification.permission !== 'granted') {
@@ -42,14 +44,14 @@ export const ChatPage = () => {
           const newMessage = payload.new as Message;
           if (
             selectedContact &&
-            ((newMessage.sender_id === user?.id && newMessage.receiver_id === selectedContact.user_id) ||
-             (newMessage.sender_id === selectedContact.user_id && newMessage.receiver_id === user?.id))
+            ((newMessage.sender_id === userSession?.user?.id && newMessage.receiver_id === selectedContact.user_id) || // Use userSession?.user?.id
+             (newMessage.sender_id === selectedContact.user_id && newMessage.receiver_id === userSession?.user?.id)) // Use userSession?.user?.id
           ) {
             addMessage(newMessage);
           }
 
           // Notification logic
-          if (newMessage.receiver_id === user?.id && document.hidden) {
+          if (newMessage.receiver_id === userSession?.user?.id && document.hidden) { // Use userSession?.user?.id
             new Notification('New Message', {
               body: newMessage.content || 'Sent an image',
             });
@@ -61,7 +63,7 @@ export const ChatPage = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedContact, user, addMessage]);
+  }, [selectedContact, userSession?.user, addMessage]); // Use userSession?.user
 
   const handleLogout = async () => {
     try {
@@ -78,6 +80,33 @@ export const ChatPage = () => {
       await sendMessage(selectedContact.user_id, message, imageUrl);
     } catch (error) {
       alert('Send message failed: ' + (error as Error).message);
+    }
+  };
+
+  // New function to handle adding a contact
+  const handleOnAddContact = async (user: UserSearchResult) => {
+    if (!user || !user.id || !userSession?.access_token) return;
+    try {
+      const response = await fetch('http://localhost:3000/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userSession.access_token}`,
+        },
+        body: JSON.stringify({ contactUserId: user.id }),
+      });
+
+      if (response.ok) {
+        const newContact: Contact = await response.json();
+        addContactToStore(newContact); // Add the newly created contact to the store
+        setSelectedContact(newContact); // Select the new contact
+        alert(`Contact ${newContact.name} added successfully!`);
+      } else {
+        const errorData = await response.json();
+        alert('Failed to add contact: ' + (errorData.message || response.statusText));
+      }
+    } catch (error) {
+      alert('Failed to add contact: ' + (error as Error).message);
     }
   };
 
@@ -107,14 +136,14 @@ export const ChatPage = () => {
             <>
               <MessageList
                 messages={messages}
-                currentUserId={user?.id || ''}
+                currentUserId={userSession?.user?.id || ''} // Use userSession?.user?.id
               />
               <MessageInput onSendMessage={handleSendMessage} />
             </>
           ) : (
             <div className="no-contact-selected">
               <div>
-                <h2>Welcome, {user?.email}</h2>
+                <h2>Welcome, {userSession?.user?.email}</h2> {/* Use userSession?.user?.email */}
                 <p>Select a contact to start messaging</p>
               </div>
             </div>
@@ -124,10 +153,7 @@ export const ChatPage = () => {
       <AddContactModal
         isOpen={isAddContactModalOpen}
         onClose={() => setIsAddContactModalOpen(false)}
-        onSelectContact={(contact) => {
-          setSelectedContact(contact);
-          setIsAddContactModalOpen(false);
-        }}
+        onAddContact={handleOnAddContact} // Changed prop name and passed new handler
       />
     </div>
   );
