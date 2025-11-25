@@ -106,6 +106,7 @@ export const ChatPage = () => {
       if (response.ok) {
         const newContact: Contact = await response.json();
         addContactToStore(newContact); // Add the newly created contact to the store
+        fetchContacts(); // Refresh the contact list after adding a new contact
         setSelectedContact(newContact); // Select the new contact
         alert(`Contact ${newContact.name} added successfully!`);
       } else {

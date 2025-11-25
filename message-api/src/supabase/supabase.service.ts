@@ -22,7 +22,6 @@ export class SupabaseService {
   }
 
   getClientWithAuth(accessToken: string): SupabaseClient {
-    console.log('getClientWithAuth received accessToken:', accessToken);
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY'); // Use SUPABASE_KEY for client-side auth
 

@@ -80,7 +80,7 @@ export class ContactsService {
   }
 
   async findAll(user: AuthenticatedUser): Promise<Contact[]> {
-    console.log('Fetching contacts for userId:', user.id);
+
     const { data: relationships, error: relError } = await this.SupabaseService
       .getClientWithAuth(user.access_token)
       .from('contact_relationships')
@@ -91,7 +91,7 @@ export class ContactsService {
       throw new Error(`Error fetching contact relationships: ${relError.message}`);
     }
 
-    console.log('Fetched relationships:', relationships);
+    //console.log('Fetched relationships:', relationships);
 
     if (!relationships || relationships.length === 0) {
       return [];
@@ -126,7 +126,7 @@ export class ContactsService {
     if (!email) {
       return [];
     }
-    console.log(`Searching for email matching: ${email}`);
+    //console.log(`Searching for email matching: ${email}`);
     const adminClient = this.SupabaseService.getAdminClient();
     
     const { data: users, error: userError } = await adminClient
