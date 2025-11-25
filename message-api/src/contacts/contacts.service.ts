@@ -1,3 +1,4 @@
+import { AuthenticatedUser } from '../auth/user.decorator';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 import { Contact } from './entities/contact.entity';
@@ -78,17 +79,19 @@ export class ContactsService {
     return data;
   }
 
-  async findAll(userId: string): Promise<Contact[]> {
-    // Step 1: Get all relationship rows for the current user
+  async findAll(user: AuthenticatedUser): Promise<Contact[]> {
+    console.log('Fetching contacts for userId:', user.id);
     const { data: relationships, error: relError } = await this.SupabaseService
-      .getClient()
+      .getClientWithAuth(user.access_token)
       .from('contact_relationships')
       .select('contact_user_id')
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (relError) {
       throw new Error(`Error fetching contact relationships: ${relError.message}`);
     }
+
+    console.log('Fetched relationships:', relationships);
 
     if (!relationships || relationships.length === 0) {
       return [];

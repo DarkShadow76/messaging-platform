@@ -3,7 +3,7 @@ import { ContactsService } from './contacts.service';
 import { Contact } from './entities/contact.entity';
 import { AuthGuard } from '../auth/auth/auth.guard'; // Corrected path for AuthGuard
 import { User } from '../auth/user.decorator';
-import type { User as AuthUser } from '@supabase/supabase-js'; // Added this line
+import type { AuthenticatedUser } from '../auth/user.decorator'; // Import AuthenticatedUser
 import { CreateContactDto } from './dto/create-contact.dto';
 
 @Controller('contacts')
@@ -13,8 +13,8 @@ export class ContactsController {
 
   @Get()
   @UseGuards(AuthGuard)
-  findAll(@User() user: AuthUser) {
-    return this.contactsService.findAll(user.id);
+  findAll(@User() user: AuthenticatedUser) {
+    return this.contactsService.findAll(user);
   }
 
   // Search for contacts by name (old search functionality, now explicit)
@@ -33,7 +33,7 @@ export class ContactsController {
   @UseGuards(AuthGuard)
   create(
     @Body() createContactDto: CreateContactDto,
-    @User() user: AuthUser,
+    @User() user: AuthenticatedUser,
   ) {
     return this.contactsService.create(user.id, createContactDto);
   }

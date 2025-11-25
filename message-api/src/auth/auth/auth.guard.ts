@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from 'src/supabase/supabase.service';
+import { User, Session } from '@supabase/supabase-js'; // Import User and Session types
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,7 +23,13 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('Invalid token');
       }
 
-      request['user'] = data.user;
+      // Assert the type of data to include the session property
+      const authDataWithSession = data as { user: User; session: Session | null; };
+
+      request['user'] = {
+        ...authDataWithSession.user,
+        access_token: token, // Use the extracted token directly
+      };
     } catch {
       throw new UnauthorizedException('Invalid token');
     }

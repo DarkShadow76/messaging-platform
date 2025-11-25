@@ -21,6 +21,27 @@ export class SupabaseService {
     return this.supabase;
   }
 
+  getClientWithAuth(accessToken: string): SupabaseClient {
+    console.log('getClientWithAuth received accessToken:', accessToken);
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const supabaseKey = this.configService.get<string>('SUPABASE_KEY'); // Use SUPABASE_KEY for client-side auth
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase URL or Key is not defined in environment variables');
+    }
+
+    return createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false, // Do not persist session on the server-side
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    });
+  }
+
   getAdminClient(): SupabaseClient {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseServiceKey = this.configService.get<string>('SUPABASE_SERVICE_KEY');

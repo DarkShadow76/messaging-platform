@@ -17,7 +17,7 @@ export const ChatPage = () => {
   const logout = useAuthStore((state) => state.logout);
   const userSession = useAuthStore((state) => state.session); // Renamed user to userSession for clarity
   const { messages, fetchMessages, sendMessage, addMessage } = useMessageStore();
-  const { addContact: addContactToStore } = useContactStore(); // Get addContact from contactStore
+  const { addContact: addContactToStore, fetchContacts } = useContactStore(); // Get addContact and fetchContacts from contactStore
   const { selectedContact, setSelectedContact } = useChatStore();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -28,6 +28,12 @@ export const ChatPage = () => {
       fetchMessages(selectedContact.user_id);
     }
   }, [userSession?.user, selectedContact, fetchMessages]); // Use userSession?.user
+
+  useEffect(() => {
+    if (userSession?.user) {
+      fetchContacts();
+    }
+  }, [userSession?.user, fetchContacts]);
 
   useEffect(() => {
     if (Notification.permission !== 'granted') {

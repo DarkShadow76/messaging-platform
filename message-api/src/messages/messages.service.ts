@@ -30,20 +30,23 @@ export class MessagesService {
   }
 
   async findAllByContact(
+    userId: string,
     contactId: string,
     paginationDto: PaginationDto,
   ): Promise<Message[]> {
+    console.log('findAllByContact - userId:', userId, 'contactId:', contactId);
     const { page = 1, limit = 10 } = paginationDto;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit - 1;
+    const offset = (page - 1) * limit;
 
     const { data, error } = await this.supabaseService
       .getClient()
       .from('messages')
       .select('*')
-      .or(`sender_id.eq.${contactId},receiver_id.eq.${contactId}`)
+      .or(
+        `and(sender_id.eq.${userId},receiver_id.eq.${contactId}),and(sender_id.eq.${contactId},receiver_id.eq.${userId})`,
+      )
       .order('created_at', { ascending: false })
-      .range(startIndex, endIndex);
+      .range(offset, offset + limit - 1);
 
     if (error) {
       throw new Error(error.message);

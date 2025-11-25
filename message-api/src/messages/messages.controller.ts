@@ -24,7 +24,12 @@ export class MessagesController {
   findAllByContact(
     @Param('contactId') contactId: string,
     @Query() paginationDto: PaginationDto,
+    @User() user: AuthUser,
   ): Promise<Message[]> {
-    return this.messagesService.findAllByContact(contactId, paginationDto);
+    return this.messagesService.findAllByContact(
+      user.id,
+      contactId,
+      paginationDto,
+    );
   }
 }
