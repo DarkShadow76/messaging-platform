@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
-import type { Contact, UserSearchResult } from '../types';
+import type { UserSearchResult } from '../types';
 
 interface AddContactModalProps {
   isOpen: boolean;

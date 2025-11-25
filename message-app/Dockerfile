@@ -1,12 +1,12 @@
 # Stage 1: Build the React application
-FROM node:24.11-bookworm AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY message-app/package*.json ./
 RUN npm install
 
-COPY . .
+COPY message-app/ .
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx
@@ -21,7 +21,7 @@ RUN apk add --no-cache openssl && \
     -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost"
 
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY message-app/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 EXPOSE 443

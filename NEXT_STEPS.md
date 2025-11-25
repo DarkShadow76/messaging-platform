@@ -6,15 +6,15 @@ This document outlines the remaining tasks to complete the messaging platform pr
 
 The backend is about 70% complete. The remaining tasks are focused on the last API feature, security hardening, and deployment.
 
-- [ ] **Implement "Search Contacts" Endpoint**
-    - [ ] Add a `search(query)` method to `ContactsController` to handle `GET /contacts/search?q=...`.
-    - [ ] Implement the search logic in `ContactsService` to find contacts by name (e.g., using an `ILIKE` query).
-    - [ ] Ensure the new endpoint is protected by the `AuthGuard`.
+- [x] **Implement "Search Contacts" Endpoint**
+    - [x] Add a `search(query)` method to `ContactsController` to handle `GET /contacts/search?q=...`.
+    - [x] Implement the search logic in `ContactsService` to find contacts by name (e.g., using an `ILIKE` query).
+    - [x] Ensure the new endpoint is protected by the `AuthGuard`.
 
-- [ ] **Implement Row Level Security (RLS)**
-    - [ ] In the Supabase dashboard, write and apply a policy for the `contacts` table to ensure users can only read and write their *own* contacts (`user_id = auth.uid()`).
-    - [ ] Write and apply a policy for the `messages` table so users can only access messages where they are the `sender_id` or the `receiver_id`.
-    - [ ] Test all backend endpoints to confirm the RLS policies are working as expected.
+- [x] **Implement Row Level Security (RLS)**
+    - [x] In the Supabase dashboard, write and apply a policy for the `contacts` table to ensure users can only read and write their *own* contacts (`user_id = auth.uid()`).
+    - [x] Write and apply a policy for the `messages` table so users can only access messages where they are the `sender_id` or the `receiver_id`.
+    - [x] Test all backend endpoints to confirm the RLS policies are working as expected.
 
 - [ ] **Deployment**
     - [ ] Create a new "Web Service" project on Render.
@@ -40,9 +40,9 @@ The frontend is about 15% complete (foundational setup is done). The next steps 
     - [x] Create a `MessageView` component.
     - [x] When a user clicks on a contact in the `ContactList`, the `MessageView` should fetch and display the message history for that contact (`GET /messages/:contactId`).
 
-- [ ] **Implement Real-Time Functionality**
-    - [ ] In the `MessageView` component, use the Supabase client to subscribe to real-time inserts on the `messages` table.
-    - [ ] When a new message event is received, update the `MessageView` to display it instantly without needing a page refresh.
+- [x] **Implement Real-Time Functionality**
+    - [x] In the `MessageView` component, use the Supabase client to subscribe to real-time inserts on the `messages` table.
+    - [x] When a new message event is received, update the `MessageView` to display it instantly without needing a page refresh.
 
 - [x] **Implement "Send Message" UI**
     - [x] Add a text input and a "Send" button to the `MessageView`.

@@ -7,6 +7,7 @@ const API_URL = 'http://localhost:3000';
 interface ContactState {
   contacts: Contact[];
   fetchContacts: () => Promise<void>;
+  addContact: (contact: Contact) => void;
 }
 
 export const useContactStore = create<ContactState>((set) => ({
@@ -27,5 +28,8 @@ export const useContactStore = create<ContactState>((set) => ({
 
     const contacts = await response.json();
     set({ contacts });
+  },
+  addContact: (contact: Contact) => {
+    set((state) => ({ contacts: [...state.contacts, contact] }));
   },
 }));
