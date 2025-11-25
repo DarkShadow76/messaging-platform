@@ -1,19 +1,25 @@
 import { useEffect } from 'react';
 import { useContactStore } from '../store/contactStore';
+import { useChatStore } from '../store/chatStore';
 import type { Contact } from '../types';
 
 interface ContactListProps {
-  onSelectContact: (contact: Contact) => void;
-  selectedContact: Contact | null;
   isOpen: boolean;
+  onClose: () => void;
 }
 
-export const ContactList = ({ onSelectContact, selectedContact, isOpen }: ContactListProps) => {
+export const ContactList = ({ isOpen, onClose }: ContactListProps) => {
   const { contacts, fetchContacts } = useContactStore();
+  const { setSelectedContact, selectedContact } = useChatStore();
 
   useEffect(() => {
     fetchContacts();
   }, [fetchContacts]);
+
+  const handleContactClick = (contact: Contact) => {
+    setSelectedContact(contact);
+    onClose();
+  };
 
   return (
     <aside className={`contact-list ${isOpen ? 'open' : ''}`}>
@@ -28,7 +34,7 @@ export const ContactList = ({ onSelectContact, selectedContact, isOpen }: Contac
               className={`contact-item ${
                 selectedContact?.id === contact.id ? 'selected' : ''
               }`}
-              onClick={() => onSelectContact(contact)}
+              onClick={() => handleContactClick(contact)}
             >
               <div className="contact-avatar">
                 <img src={contact.avatar_url} alt={contact.name} />

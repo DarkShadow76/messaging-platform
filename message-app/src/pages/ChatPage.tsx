@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useMessageStore } from '../store/messageStore';
 import { useContactStore } from '../store/contactStore'; // Added import
+import { useChatStore } from '../store/chatStore';
 import { ContactList } from '../components/ContactList';
 import { ChatHeader } from '../components/ChatHeader';
 import { MessageList } from '../components/MessageList';
@@ -17,8 +18,8 @@ export const ChatPage = () => {
   const userSession = useAuthStore((state) => state.session); // Renamed user to userSession for clarity
   const { messages, fetchMessages, sendMessage, addMessage } = useMessageStore();
   const { addContact: addContactToStore } = useContactStore(); // Get addContact from contactStore
+  const { selectedContact, setSelectedContact } = useChatStore();
   const navigate = useNavigate();
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);
 
@@ -115,12 +116,8 @@ export const ChatPage = () => {
       <div className="chat-page glass-panel">
         <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
           <ContactList
-            onSelectContact={(contact) => {
-              setSelectedContact(contact);
-              setIsSidebarOpen(false);
-            }}
-            selectedContact={selectedContact}
-            isOpen={true}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
           />
         </div>
         

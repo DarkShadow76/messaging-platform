@@ -24,7 +24,7 @@ export class ContactsService {
 
     // 2. Check if contact already exists for the current user
     const { data: existingContact, error: existingContactError } = await adminClient
-      .from('contacts')
+      .from('contact_relationships')
       .select('*')
       .eq('user_id', currentUserId)
       .eq('contact_user_id', contactUserId)
@@ -40,13 +40,11 @@ export class ContactsService {
     }
 
     // 3. Insert new contact
-    const { data, error: insertError } = await adminClient
-      .from('contacts')
+    const { error: insertError } = await adminClient
+      .from('contact_relationships')
       .insert({
         user_id: currentUserId,
         contact_user_id: contactUserId,
-        name: contactUser.full_name || contactUser.id, // Use full_name or id as fallback
-        avatar_url: contactUser.avatar_url || null, // Use avatar_url or null
       })
       .select()
       .single();
@@ -56,7 +54,12 @@ export class ContactsService {
       throw new BadRequestException('Failed to add contact.');
     }
 
-    return data;
+    return {
+      id: contactUser.id,
+      user_id: contactUser.id,
+      name: contactUser.full_name,
+      avatar_url: contactUser.avatar_url,
+    };
   }
 
 
@@ -75,17 +78,45 @@ export class ContactsService {
     return data;
   }
 
-  async findAll(): Promise<Contact[]> {
-    const { data, error } = await this.SupabaseService
+  async findAll(userId: string): Promise<Contact[]> {
+    // Step 1: Get all relationship rows for the current user
+    const { data: relationships, error: relError } = await this.SupabaseService
       .getClient()
-      .from('contacts')
-      .select('*');
+      .from('contact_relationships')
+      .select('contact_user_id')
+      .eq('user_id', userId);
 
-    if (error) {
-      throw new Error(`Error fetching contacts: ${error.message}`);
+    if (relError) {
+      throw new Error(`Error fetching contact relationships: ${relError.message}`);
     }
 
-    return data;
+    if (!relationships || relationships.length === 0) {
+      return [];
+    }
+
+    // Step 2: Extract the UUIDs of the contacts
+    const contactUuids = relationships.map(r => r.contact_user_id);
+
+    // Step 3: Fetch all profiles from the 'users' table that match the UUIDs
+    const { data, error } = await this.SupabaseService
+      .getClient()
+      .from('users')
+      .select('id, full_name, avatar_url')
+      .in('id', contactUuids);
+
+    if (error) {
+      throw new Error(`Error fetching contact profiles: ${error.message}`);
+    }
+
+    // Step 4: Map the user data to the Contact entity
+    const contacts: Contact[] = data.map(user => ({
+      id: user.id, // Or another unique identifier from the user object if more appropriate
+      user_id: user.id,
+      name: user.full_name,
+      avatar_url: user.avatar_url,
+    }));
+
+    return contacts;
   }
 
   async findByEmail(email: string): Promise<any[]> {
