@@ -14,25 +14,21 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('No token provided');
     }
 
-    try {
-      const { data, error} = await this.supabaseService
-      .getClient()
-      .auth.getUser(token);
-    
-      if (error || !data.user) {
-        throw new UnauthorizedException('Invalid token');
-      }
+    const { data, error} = await this.supabaseService
+    .getClient()
+    .auth.getUser(token)
+    .catch(() => {
+      throw new UnauthorizedException('Invalid token' + error);
+    });
 
-      // Assert the type of data to include the session property
-      const authDataWithSession = data as { user: User; session: Session | null; };
+    // Assert the type of data to include the session property
+    const authDataWithSession = data as { user: User; session: Session | null; };
 
-      request['user'] = {
-        ...authDataWithSession.user,
-        access_token: token, // Use the extracted token directly
-      };
-    } catch {
-      throw new UnauthorizedException('Invalid token');
-    }
+    request['user'] = {
+      ...authDataWithSession.user,
+      access_token: token, // Use the extracted token directly
+    };
+
 
     return true;
   }
