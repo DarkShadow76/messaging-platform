@@ -27,6 +27,7 @@ export const useContactStore = create<ContactState>((set) => ({
     }
 
     const contacts = await response.json();
+    console.log('Fetched contacts from API:', contacts);
     set({ contacts });
   },
   addContact: (contact: Contact) => {

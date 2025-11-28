@@ -12,13 +12,14 @@ import {
 export const SignUpPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const signup = useAuthStore((state) => state.signup);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signup(email, password);
+      await signup(email, password, fullName);
       navigate('/');
     } catch (error) {
       alert('Sign Up failed: ' + (error as Error).message);
@@ -33,6 +34,15 @@ export const SignUpPage = () => {
             Sign Up
           </Typography>
           <form onSubmit={handleSubmit}>
+            <TextField
+              label="Full Name"
+              type="text"
+              fullWidth
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              sx={{ mb: 2 }}
+              required
+            />
             <TextField
               label="Email"
               type="email"
@@ -61,3 +71,4 @@ export const SignUpPage = () => {
     </div>
   );
 };
+

@@ -1,14 +1,22 @@
 services:
-  api:
+  message-api:
     container_name: message-api
-    build: ./message-api
+    build:
+      context: ./message-api
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     env_file:
       - ./message-api/.env
-  app:
+  message-app:
     container_name: message-app
-    build: ./message-app
+    build:
+      context: ./message-app
+      dockerfile: Dockerfile
     ports:
       - "5173:80" # The frontend is served by Nginx on port 80 inside the container. We map it to 5173 on the host.
       - "8443:443"
+    env_file:
+      - ./message-app/.env
+    depends_on:
+      - message-api

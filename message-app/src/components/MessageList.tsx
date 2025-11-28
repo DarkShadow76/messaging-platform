@@ -35,7 +35,7 @@ export const MessageList = ({ messages, currentUserId }: MessageListProps) => {
                 style={{ maxWidth: '200px', borderRadius: '8px', marginBottom: '8px', display: 'block' }}
               />
             )}
-            <p style={{ margin: 0 }}>{msg.content}</p>
+            <p style={{ margin: 0, color: "black" }}>{msg.content}</p>
           </div>
           <span className="message-timestamp">{formatTime(msg.created_at)}</span>
         </div>

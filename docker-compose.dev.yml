@@ -1,5 +1,5 @@
 services:
-  api:
+  message-api:
     container_name: message-api-dev
     build:
       context: ./message-api
@@ -11,7 +11,7 @@ services:
     env_file:
       - ./message-api/.env
     command: npm run start:dev
-  app:
+  message-app:
     container_name: message-app-dev
     build:
       context: ./message-app
@@ -22,3 +22,6 @@ services:
       - ./message-app/src:/usr/src/app/src
     env_file:
       - ./message-app/.env
+    command: npm run dev
+    depends_on:
+      - message-api

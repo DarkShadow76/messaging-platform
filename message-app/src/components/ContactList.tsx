@@ -37,10 +37,12 @@ export const ContactList = ({ isOpen, onClose }: ContactListProps) => {
               onClick={() => handleContactClick(contact)}
             >
               <div className="contact-avatar">
-                <img src={contact.avatar_url} alt={contact.name} />
+                <img src={contact.avatar_url} alt={contact.full_name || contact.email || contact.user_id} />
               </div>
               <div className="contact-info">
-                <span className="contact-name">{contact.name}</span>
+                <span className="contact-name">
+                  {contact.full_name || contact.email || 'Unknown Contact'}
+                </span>
               </div>
             </li>
           ))}

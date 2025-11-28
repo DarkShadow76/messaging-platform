@@ -15,7 +15,7 @@ export class ContactsService {
     // 1. Verify contactUserId exists in public.users
     const { data: contactUser, error: userError } = await adminClient
       .from('users')
-      .select('id, full_name, avatar_url')
+      .select('id, email, full_name, avatar_url')
       .eq('id', contactUserId)
       .single();
 
@@ -58,7 +58,8 @@ export class ContactsService {
     return {
       id: contactUser.id,
       user_id: contactUser.id,
-      name: contactUser.full_name,
+      email: contactUser.email,
+      full_name: contactUser.full_name,
       avatar_url: contactUser.avatar_url,
     };
   }
@@ -104,18 +105,21 @@ export class ContactsService {
     const { data, error } = await this.SupabaseService
       .getClient()
       .from('users')
-      .select('id, full_name, avatar_url')
+      .select('id, email, full_name, avatar_url')
       .in('id', contactUuids);
 
     if (error) {
       throw new Error(`Error fetching contact profiles: ${error.message}`);
     }
 
+    // console.log('Fetched user data from database:', data);
+
     // Step 4: Map the user data to the Contact entity
     const contacts: Contact[] = data.map(user => ({
       id: user.id, // Or another unique identifier from the user object if more appropriate
       user_id: user.id,
-      name: user.full_name,
+      email: user.email,
+      full_name: user.full_name,
       avatar_url: user.avatar_url,
     }));
 
@@ -139,7 +143,7 @@ export class ContactsService {
       throw new Error(`Error searching public.users: ${userError.message}`);
     }
 
-    console.log(`Found ${users?.length} matching users in public.users for "${email}"`);
+    // console.log(`Found ${users?.length} matching users in public.users for "${email}"`);
     return users; // Return the raw user data from public.users
   }  
 }

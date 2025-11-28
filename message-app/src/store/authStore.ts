@@ -8,7 +8,7 @@ interface AuthState {
   checkSession: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, fullName: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -31,8 +31,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ session: null });
   },
 
-  signup: async (email, password) => {
-    const { error, data } = await supabase.auth.signUp({ email, password });
+  signup: async (email, password, fullName) => {
+    const { error, data } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        }
+      }
+    });
     if (error) throw error;
     set({ session: data.session });
   }

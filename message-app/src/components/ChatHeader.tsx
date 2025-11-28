@@ -17,9 +17,11 @@ export const ChatHeader = ({ selectedContact, onLogout, onToggleSidebar, onAddCo
         {selectedContact ? (
           <>
             <div className="contact-avatar">
-              <img src={selectedContact.avatar_url} alt={selectedContact.name} />
+              <img src={selectedContact.avatar_url} alt={selectedContact.full_name || selectedContact.email || selectedContact.user_id} />
             </div>
-            <h1>{selectedContact.name}</h1>
+            <h1 style={{ color: 'black' }}>
+              {selectedContact.full_name || selectedContact.email || 'Unknown Contact'}
+            </h1>
           </>
         ) : (
           <h1 style={{ color: 'var(--text-primary)' }}>Messaging App</h1>

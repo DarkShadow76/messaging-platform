@@ -108,7 +108,7 @@ export const ChatPage = () => {
         addContactToStore(newContact); // Add the newly created contact to the store
         fetchContacts(); // Refresh the contact list after adding a new contact
         setSelectedContact(newContact); // Select the new contact
-        alert(`Contact ${newContact.name} added successfully!`);
+        alert(`Contact ${newContact.full_name} added successfully!`);
       } else {
         const errorData = await response.json();
         alert('Failed to add contact: ' + (errorData.message || response.statusText));
